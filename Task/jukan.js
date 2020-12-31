@@ -1,5 +1,5 @@
 /*
-聚看点极速版签到任务
+聚看点签到任务，不支持Actions跑阅读任务，其他任务可运行
 打开'我的'获取Cookie
 
 https:\/\/www\.xiaodouzhuan\.cn\/jkd\/newMobileMenu\/infoMe\.action url script-request-body jukan.js
@@ -86,26 +86,29 @@ if (typeof $request !== 'undefined') {
       bodyval = BodyArr[i]
       ID =  decodeURIComponent(bodyval).match(/"openid" : "\w+"/)
       apptoken = decodeURIComponent(bodyval).match(/"apptoken" : "\w+"/)
+   
       times = Date.parse(new Date())/1000
-$.log(times)
-      bodys = [bodyval.replace(/time%22%20%3A%20%22\d+/, `time%22%20%3A%20%22${times}`),bodyval.replace(/time%22%20%3A%20%22\d+/, `time%22%20%3A%20%22${times+31000}%22%2C%20`+'cateid%22%20:%20%2253')]
+      bodys = [bodyval.replace(/time%22%20%3A%20%22\d+%22/, `time%22%20%3A%20%22${times}%22%2C%20`+'%22cateid%22%20%3A%203'),bodyval.replace(/time%22%20%3A%20%22\d+%22/, `time%22%20%3A%20%22${times+31000}%22%2C%20`+'%22cateid%22%20%3A%2053')]
       $.index = i + 1;
       await sign();
       await getsign();
       await Stimulate("17")
    for(boxtype of [1,2]){
-      await $.wait(1000)
-      await BoxProfit(boxtype)
+      await $.wait(1000);
+      await BoxProfit(boxtype);
     }
-   await userinfo()
+      await userinfo()
   if (curcash >= drawcash&&wxname){
       await realname();
       await Withdraw();
    }
       await WelfareCash();
+   if(new Date().getTimezoneOffset() !='-480'){
+    break
+   } else {
  for (readbodyVal of bodys){
-     $.log(readbodyVal)
      await artList(readbodyVal)
+    }
    }
   }
  } 
@@ -270,7 +273,7 @@ function artList(readbodyVal) {
       }
    $.post(infourl, async(error, resp, data) => {
      let get_list = JSON.parse(data)
-        $.log( data)
+       // $.log( data)
          $.log("【开始自动阅读】")
      if (get_list.ret == "ok"){
        for( lists of get_list.artlist){
@@ -288,8 +291,8 @@ function artList(readbodyVal) {
          $.log("正在观看视频: "+art_Title +"  -------- <"+screen_Name +">\n ")
           await readTask(lists.art_id,"2")
           }
-        if(taskresult  == `R-ART-1002`|| taskresult ==`R-ART-0011`){
-         break 
+        if(taskresult == 'R-ART-1002'|| taskresult ==`R-ART-0011`){
+         break
           }
          }
        }  
@@ -307,7 +310,7 @@ function readTask(artid,arttype) {
       body: `jsondata={"appid":"xzwl","channel":"IOS","psign":"92dea068b6c271161be05ed358b59932","relate":1,"artid":"${artid}","os":"IOS",${ID},${apptoken},"appversion":"5.6.5"}`
       }
    $.post(rewurl, async(error, resp, data) => {
-     $.log(data)
+     //$.log(data)
      if(resp.statusCode ==200){
          await $.wait(31000) 
          await finishTask(artid,arttype)
@@ -321,9 +324,11 @@ function readTask(artid,arttype) {
 
 function finishTask(artid,arttype) {
   return new Promise((resolve, reject) =>{
+    times = Date.parse(new Date())/1000
    let finishurl =  {
       url: `https://www.xiaodouzhuan.cn/jkd/account/readAccount.action`,
-      headers: {Cookie:cookieval,'User-Agent':UA},      body: `jsondata={"read_weal":"0","appid":"xzwl","paytype":${arttype},"channel":"IOS",${apptoken},"appversion":"5.6.5",${ID},"os":"iOS","artid":"${artid}","readmodel":"1"}`
+      headers: {Cookie:cookieval,'User-Agent':UA},      
+      body: `jsondata={"appid":"xzwl","read_weal":0,"paytype":${arttype},"securitykey":"","channel":"iOS","psign":"92dea068b6c271161be05ed358b59932","appversioncode":"565","time":"${times}",${apptoken},"appversion":"5.6.5",${ID},"os":"iOS","artid":${artid},"accountType":"0","readmodel":"1"}`
       }
    $.post(finishurl, async(error, response, data) => {
      $.log(data+"\n")
